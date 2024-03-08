@@ -1,0 +1,139 @@
+---
+title: "Fashion Trend Analysis"
+output: html_notebook
+---
+ 
+
+```{r setup}
+library(readr)
+library(ggplot2)
+library(dplyr)
+Vogue_Images_Sheet1 <- read_csv("~/Downloads/Vogue_Images - Sheet1.csv")
+```
+
+```{r EDA}
+char_table <- table(Vogue_Images_Sheet1)
+char_vector <- as.vector(char_table)
+barplot(char_vector, names.arg = names(char_vector), main = "Frequency Distribution", xlab = "Categories", ylab = "Frequency")
+```
+
+
+```{r barplot}
+# Define custom colors for primary_color
+color_mapping <- c("Red" = "firebrick", "Blue" = "steelblue", "Green" = "forestgreen", "Yellow" = "gold", "Black" = "black", "Orange" = "orange", "Brown" = "brown","Pink" = "pink", "Purple" = "purple", "White" = "white" )
+
+# Create chart
+ggplot(Vogue_Images_Sheet1, aes(x = factor(year), fill = primary_color)) +
+  geom_bar(position = "dodge") +
+  facet_wrap(~ designer, scales = "free_y", ncol = 1) +
+  labs(title = "Primary Color Changes Over Time by Designer",
+       x = "Year",
+       y = "Count") +
+  scale_fill_manual(values = color_mapping) + 
+  theme_minimal()
+```
+
+```{r clustering}
+library(cluster)
+library(factoextra)
+library(caret)
+x <- Vogue_Images_Sheet1[, 4:7]
+dummy_data <- dummyVars(~., data = x)
+categorical_matrix <- predict(dummy_data, newdata = x)
+# scaled_x <- scale(x)
+# wss <- numeric(10)
+wcss_values <- c()
+for (k in 1:10) {
+  kmodes_result <- pam(categorical_matrix, k)
+  wcss_values <- c(wcss_values, kmodes_result$tot.withinss)
+}
+
+# Elbow plot
+plot(1:10, wcss_values, type = "b", pch = 19, frame = FALSE, main = "Elbow Plot", xlab = "Number of Clusters", ylab = "Within-Cluster Sum of Squares (WCSS)")
+```
+
+```{r silhouette method}
+set.seed(123)
+silhouette_scores <- c()
+
+for (k in 2:10) {
+  kmeans_result <- kmeans(categorical_matrix, centers = k)
+  silhouette_scores <- c(silhouette_scores, silhouette(kmeans_result$cluster, dist(categorical_matrix)))
+}
+plot(2:10, silhouette_scores, type = "b", pch = 19, frame = FALSE, 
+     xlab = "Number of Clusters (k)", ylab = "Silhouette Score", main = "Silhouette Method")
+```
+
+
+```{r k means clustering}
+set.seed(123)
+k <- 4
+kmeans_result <- kmeans(categorical_matrix, centers = k)
+cluster_assignments <- kmeans_result$cluster
+fviz_cluster(list(data = categorical_matrix, cluster = cluster_assignments))
+```
+
+``` {r knn classification}
+library(class)
+set.seed(123)
+random_sample <- createDataPartition(Vogue_Images_Sheet1$primary_color,
+                                p = 0.8, list = FALSE)
+
+# Split data into train and test sets
+train_rx <- Vogue_Images_Sheet1[random_sample, ] %>% select(year)
+train_ry <- Vogue_Images_Sheet1[random_sample, ] %>% select(primary_color)
+test_rx <- Vogue_Images_Sheet1[-random_sample, ] %>% select(year)
+test_ry <- Vogue_Images_Sheet1[-random_sample, ] %>% select(primary_color)
+
+# Specify number of neighbors
+k <- 4
+
+# Perform KNN classification
+knn_result <- knn(train = as.matrix(train_rx), test = as.matrix(test_rx), cl = unlist(train_ry), k = k)
+
+# Evaluate the classification accuracy
+accuracy <- sum(knn_result == unlist(test_ry)) / length(unlist(test_ry))
+cat("Accuracy:", accuracy, "\n")
+```
+
+```{r knn classification 2}
+# Split data into train and test sets
+random_sample <- createDataPartition(Vogue_Images_Sheet1$year,
+                                p = 0.8, list = FALSE)
+train_cx <- Vogue_Images_Sheet1[random_sample, ] %>% select(year)
+train_cy <- Vogue_Images_Sheet1[random_sample, ] %>% select(short_or_long)
+test_cx <- Vogue_Images_Sheet1[-random_sample, ] %>% select(year)
+test_cy <- Vogue_Images_Sheet1[-random_sample, ] %>% select(short_or_long)
+
+# Specify number of neighbors
+k <- 4
+
+# Perform KNN classification
+knn_result <- knn(train = as.matrix(train_cx), test = as.matrix(test_cx), cl = unlist(train_cy), k = k)
+
+# Evaluate the classification accuracy
+accuracy <- sum(knn_result == unlist(test_cy)) / length(unlist(test_cy))
+cat("Accuracy:", accuracy, "\n")
+
+conf_matrix <- table(Predicted = knn_result, Actual = unlist(test_cy))
+```
+
+```{r knn 3}
+random_sample <- createDataPartition(Vogue_Images_Sheet1$year,
+                                p = 0.8, list = FALSE)
+train_cx <- Vogue_Images_Sheet1[random_sample, ] %>% select(year)
+train_cy <- Vogue_Images_Sheet1[random_sample, ] %>% select(loose_or_tight)
+test_cx <- Vogue_Images_Sheet1[-random_sample, ] %>% select(year)
+test_cy <- Vogue_Images_Sheet1[-random_sample, ] %>% select(loose_or_tight)
+
+# Specify number of neighbors
+k <- 4
+
+# Perform KNN classification
+knn_result <- knn(train = as.matrix(train_cx), test = as.matrix(test_cx), cl = unlist(train_cy), k = k)
+
+# Evaluate the classification accuracy
+accuracy <- sum(knn_result == unlist(test_cy)) / length(unlist(test_cy))
+cat("Accuracy:", accuracy, "\n")
+```
+
