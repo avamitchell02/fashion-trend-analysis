@@ -13,6 +13,8 @@ This investigation in data analytics aims to explore the topic of fashion trends
 
 ### Data
 
+DA 401 Capstone/Vogue_Images2 - Sheet1.csv
+
 ### Code
 
 ### Findings
