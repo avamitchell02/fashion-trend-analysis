@@ -27,7 +27,7 @@ year,season,designer,primary_color,loose_or_tight,short_or_long,item_described
 1999,fall,comme-des-garcons,white,loose,long,dress
 1999,fall,comme-des-garcons,gray,loose,short,jacket
 1999,fall,comme-des-garcons,purple,tight,long,dress
-1999,fall,comme-des-garcons,purple,short,loose,dress
+1999,fall,comme-des-garcons,purple,loose,short,dress
 1999,fall,comme-des-garcons,purple,tight,long,dress
 1999,fall,comme-des-garcons,red,tight,long,dress
 1999,fall,comme-des-garcons,red,tight,long,jacket
@@ -47,11 +47,11 @@ year,season,designer,primary_color,loose_or_tight,short_or_long,item_described
 1999,fall,alexander-mcqueen,gray,loose,long,jacket
 1999,fall,alexander-mcqueen,pink,tight,long,pants
 1999,fall,alexander-mcqueen,brown,tight,short,jacket
-1999,fall,alexander-mcqueen,multi,long,tight,jacket
-1999,fall,alexander-mcqueen,pink,short,loose,sweater
-1999,fall,alexander-mcqueen,gray,long,loose,skirt
-1999,fall,alexander-mcqueen,pink,long,loose,skirt
-1999,fall,alexander-mcqueen,black,long,loose,pants
+1999,fall,alexander-mcqueen,multi,tight,long,jacket
+1999,fall,alexander-mcqueen,pink,loose,short,sweater
+1999,fall,alexander-mcqueen,gray,loose,long,skirt
+1999,fall,alexander-mcqueen,pink,loose,long,skirt
+1999,fall,alexander-mcqueen,black,loose,long,pants
 1999,fall,alexander-mcqueen,gray,tight,long,dress
 1999,fall,alexander-mcqueen,black,loose,long,sweater
 1999,fall,alexander-mcqueen,purple,loose,long,skirt
@@ -168,8 +168,8 @@ year,season,designer,primary_color,loose_or_tight,short_or_long,item_described
 2008,fall,louis-vuitton,black,loose,long,skirt
 2008,fall,louis-vuitton,black,tight,long,dress
 2008,fall,louis-vuitton,white,tight,short,dress
-2008,fall,louis-vuitton,brown,short,tight,jacket
-2008,fall,louis-vuitton,blue,long,tight,jacket
+2008,fall,louis-vuitton,brown,tight,short,jacket
+2008,fall,louis-vuitton,blue,tight,long,jacket
 2008,fall,louis-vuitton,yellow,tight,short,jacket
 2008,fall,louis-vuitton,brown,loose,long,pants
 2008,fall,louis-vuitton,brown,tight,long,skirt
