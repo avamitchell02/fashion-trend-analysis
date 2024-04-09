@@ -12,67 +12,454 @@ library(readr)
 library(ggplot2)
 library(dplyr)
 library(GGally)
-Vogue_Images <- read_csv("~/Downloads/Vogue_Images2 - Sheet1.csv")
-ggpairs(Vogue_Images)
+Vogue_Images <- read_csv("~/Downloads/Vogue_Images2 - Sheet1-3.csv")
+summary(Vogue_Images)
 ```
 
-```{r EDA}
-char_table <- table(Vogue_Images)
-char_vector <- as.vector(char_table)
-barplot(char_vector, names.arg = names(char_vector), main = "Frequency Distribution", xlab = "Categories", ylab = "Frequency")
-```
-
-
-```{r barplot}
-# Filter data for Alexander McQueen and Louis Vuitton
-filtered_data <- Vogue_Images[Vogue_Images$designer %in% c("alexander-mcqueen", "louis-vuitton"), ]
-
-# Create a table of primary color counts for each year and designer
-color_counts <- table(filtered_data$year, filtered_data$designer, filtered_data$primary_color)
-
-# Convert color_counts to data frame for plotting
-color_counts_df <- as.data.frame(color_counts)
-names(color_counts_df) <- c("Year", "Designer", "Primary_Color", "Count")
-
-# Define colors for each primary color
-color_palette <- c("black", "blue", "brown", "gray", "green", "orange", "pink", "purple", "red", "white", "yellow", "beige")
+``` {r barplot color}
+# Count colors as proportion of total
+item_proportions <- Vogue_Images %>%
+  group_by(year, season, designer, item_described) %>%
+  summarise(count = n()) %>%
+  group_by(year, designer) %>%
+  mutate(proportion = count / sum(count))
 
 # Create the bar plot
-ggplot(color_counts_df, aes(x = Year, y = Count, fill = factor(Primary_Color, levels = c(levels(Primary_Color))))) +
-  geom_bar(stat = "identity", position = "dodge") +
-  facet_wrap(~ Designer, scales = "free_y") +
-  scale_fill_manual(values = c(color_palette)) + theme_minimal() +
-  labs(title = "Color Distribution Over Time for Alexander McQueen and Louis Vuitton",
-       x = "Year",
-       y = "Count",
-       fill = "Primary Color")
+ggplot(item_proportions, aes(x= item_described, y = proportion)) + geom_bar(stat = "identity", position = "stack") +
+  labs(x = "Clothing item", y = "Frequency", title = "Frequency of analyzed clothing items") + theme_minimal()
 ```
-```{r barplot 2}
-# Create chart
-ggplot(Vogue_Images, aes(x = factor(year), fill = item_described)) +
-  geom_bar(position = "dodge") +
-  facet_wrap(~ designer, scales = "free_y", ncol = 1) +
-  labs(title = "Fashion Trends Over Time by Designer",
-       x = "Year",
-       y = "Count") +
+
+```{r color plots}
+library(reshape2)
+# Create color palette
+colors <- c("black", "blue", "brown", "gray", "green", "beige", "orange", "pink", "purple", "red", "white", "yellow")
+
+# Get unique colors for both years
+colors_1999 <- unique(Vogue_Images$primary_color[Vogue_Images$year == 1999])
+colors_2000 <- unique(Vogue_Images$primary_color[Vogue_Images$year == 2000])
+
+# Combine unique colors and remove duplicates
+all_colors <- union(colors_1999, colors_2000)
+
+# Calculate proportions for each year
+proportion_1999 <- prop.table(table(factor(Vogue_Images$primary_color[Vogue_Images$year == 1999], levels = all_colors)))
+proportion_2000 <- prop.table(table(factor(Vogue_Images$primary_color[Vogue_Images$year == 2000], levels = all_colors)))
+
+# Create a data frame with color proportions
+color_proportions <- data.frame(
+  Color = names(proportion_1999),
+  Proportion_1999 = as.numeric(proportion_1999),
+  Proportion_2000 = as.numeric(proportion_2000)
+)
+
+# Melt the data frame for plotting
+color_proportions_melted <- melt(color_proportions, id.vars = "Color")
+
+# Plot 1999-2000
+ggplot(color_proportions_melted, aes(x = variable, y = value, color = Color, group = Color)) +
+  geom_point(aes(color = Color)) + geom_line() +
+  labs(x = "Year", y = "Proportion", title = "Change in Color (1999-2000)") +
+  scale_x_discrete(labels = c("1999", "2000")) + scale_color_manual(values = colors) + 
+  theme_minimal()
+```
+```{r length plots}
+length_1999 <- unique(Vogue_Images$short_or_long[Vogue_Images$year == 1999])
+length_2000 <- unique(Vogue_Images$short_or_long[Vogue_Images$year == 2000])
+
+all_lengths <- union(length_1999, length_2000)
+
+# Calculate proportions for each year
+proportion_1999 <- prop.table(table(factor(Vogue_Images$short_or_long[Vogue_Images$year == 1999], levels = all_lengths)))
+proportion_2000 <- prop.table(table(factor(Vogue_Images$short_or_long[Vogue_Images$year == 2000], levels = all_lengths)))
+
+
+length_proportions <- data.frame(
+  Length = names(proportion_1999),
+  Proportion_1999 = as.numeric(proportion_1999),
+  Proportion_2000 = as.numeric(proportion_2000)
+)
+
+# Melt the data frame for plotting
+length_proportions_melted <- melt(length_proportions, id.vars = "Length")
+
+# Plot 1999-2000
+ggplot(length_proportions_melted, aes(x = variable, y = value, color = Length, group = Length)) +
+  geom_point() + geom_line() +
+  labs(x = "Year", y = "Proportion", color = "Length", title = "Change in Length (1999-2000)") +
+  scale_x_discrete(labels = c("1999", "2000")) +
+  theme_minimal()
+```
+```{r fit plots}
+fit_1999 <- unique(Vogue_Images$loose_or_tight[Vogue_Images$year == 1999])
+fit_2000 <- unique(Vogue_Images$loose_or_tight[Vogue_Images$year == 2000])
+
+
+all_fits <- union(fit_1999, fit_2000)
+
+# Calculate proportions for each year
+proportion_1999 <- prop.table(table(factor(Vogue_Images$loose_or_tight[Vogue_Images$year == 1999], levels = all_fits)))
+proportion_2000 <- prop.table(table(factor(Vogue_Images$loose_or_tight[Vogue_Images$year == 2000], levels = all_fits)))
+
+# Create a data frame with fit proportions
+fit_proportions <- data.frame(
+  Fit = names(proportion_1999),
+  Proportion_1999 = as.numeric(proportion_1999),
+  Proportion_2000 = as.numeric(proportion_2000)
+)
+
+# Melt the data frame for plotting
+fit_proportions_melted <- melt(fit_proportions, id.vars = "Fit")
+
+# Plot 1999-2000
+ggplot(fit_proportions_melted, aes(x = variable, y = value, color = Fit, group = Fit)) +
+  geom_point() + geom_line() +
+  labs(x = "Year", y = "Proportion", color = "Fit", title = "Change in Fit (1999-2000)") +
+  scale_x_discrete(labels = c("1999", "2000")) +
+  theme_minimal()
+```
+```{r color plot 2}
+colors <- c("black", "blue", "brown", "gray", "green", "beige", "pink", "purple", "red", "white", "yellow", "orange")
+
+# Get unique colors for both years
+colors_2001 <- unique(Vogue_Images$primary_color[Vogue_Images$year == 2001])
+colors_2002 <- unique(Vogue_Images$primary_color[Vogue_Images$year == 2002])
+
+# Combine unique colors and remove duplicates
+all_colors <- union(colors_2001, colors_2002)
+
+# Calculate proportions for each year
+proportion_2001 <- prop.table(table(factor(Vogue_Images$primary_color[Vogue_Images$year == 2001], levels = all_colors)))
+proportion_2002 <- prop.table(table(factor(Vogue_Images$primary_color[Vogue_Images$year == 2002], levels = all_colors)))
+
+# Create a data frame with color proportions
+color_proportions <- data.frame(
+  Color = names(proportion_2001),
+  Proportion_2001 = as.numeric(proportion_2001),
+  Proportion_2002 = as.numeric(proportion_2002)
+)
+
+# Melt the data frame for plotting
+color_proportions_melted <- melt(color_proportions, id.vars = "Color")
+
+# Plot 2001-2002
+ggplot(color_proportions_melted, aes(x = variable, y = value, color = Color, group = Color)) +
+  geom_point(aes(color = Color)) + geom_line() +
+  labs(x = "Year", y = "Proportion", title = "Change in Color (2001-2002)") +
+  scale_x_discrete(labels = c("2001", "2002")) + scale_color_manual(values = colors) + 
+  theme_minimal()
+```
+```{r length plot 2}
+length_2001 <- unique(Vogue_Images$short_or_long[Vogue_Images$year == 2001])
+length_2002 <- unique(Vogue_Images$short_or_long[Vogue_Images$year == 2002])
+
+# Combine unique colors and remove duplicates
+all_lengths <- union(length_2001, length_2002)
+
+# Calculate proportions for each year
+proportion_2001 <- prop.table(table(factor(Vogue_Images$short_or_long[Vogue_Images$year == 2001], levels = all_lengths)))
+proportion_2002 <- prop.table(table(factor(Vogue_Images$short_or_long[Vogue_Images$year == 2002], levels = all_lengths)))
+
+# Create a data frame with color proportions
+length_proportions <- data.frame(
+  Length = names(proportion_2001),
+  Proportion_2001 = as.numeric(proportion_2001),
+  Proportion_2002 = as.numeric(proportion_2002)
+)
+
+# Melt the data frame for plotting
+length_proportions_melted <- melt(length_proportions, id.vars = "Length")
+
+# Plot 2001-2002
+ggplot(length_proportions_melted, aes(x = variable, y = value, color = Length, group = Length)) +
+  geom_point() + geom_line() +
+  labs(x = "Year", y = "Proportion", color = "Length", title = "Change in Length (2001-2002)") +
+  scale_x_discrete(labels = c("2001", "2002")) +
   theme_minimal()
 ```
 
-```{r multi logistic regression}
+```{r fit plot 2}
+fit_2001 <- unique(Vogue_Images$loose_or_tight[Vogue_Images$year == 2001])
+fit_2002 <- unique(Vogue_Images$loose_or_tight[Vogue_Images$year == 2002])
 
+all_fits <- union(fit_2001, fit_2002)
+
+# Calculate proportions for each year
+proportion_2001 <- prop.table(table(factor(Vogue_Images$loose_or_tight[Vogue_Images$year == 2001], levels = all_fits)))
+proportion_2002 <- prop.table(table(factor(Vogue_Images$loose_or_tight[Vogue_Images$year == 2002], levels = all_fits)))
+
+# Create a data frame with color proportions
+fit_proportions <- data.frame(
+  Fit = names(proportion_2001),
+  Proportion_2001 = as.numeric(proportion_2001),
+  Proportion_2002 = as.numeric(proportion_2002)
+)
+
+# Melt the data frame for plotting
+fit_proportions_melted <- melt(fit_proportions, id.vars = "Fit")
+
+# Plot 2001-2002
+ggplot(fit_proportions_melted, aes(x = variable, y = value, color = Fit, group = Fit)) +
+  geom_point() + geom_line() +
+  labs(x = "Year", y = "Proportion", color = "Fit", title = "Change in Fit (2001-2002)") +
+  scale_x_discrete(labels = c("2001", "2002")) +
+  theme_minimal()
 ```
 
+```{r color plot 3}
+colors <- c("black", "blue", "brown", "gray", "green", "beige", "orange", "pink", "red", "white", "yellow", "purple")
 
+# Get unique colors for both years
+colors_2008 <- unique(Vogue_Images$primary_color[Vogue_Images$year == 2008])
+colors_2009 <- unique(Vogue_Images$primary_color[Vogue_Images$year == 2009])
+
+# Combine unique colors and remove duplicates
+all_colors <- union(colors_2008, colors_2009)
+
+# Calculate proportions for each year
+proportion_2008 <- prop.table(table(factor(Vogue_Images$primary_color[Vogue_Images$year == 2008], levels = all_colors)))
+proportion_2009 <- prop.table(table(factor(Vogue_Images$primary_color[Vogue_Images$year == 2009], levels = all_colors)))
+
+# Create a data frame with color proportions
+color_proportions <- data.frame(
+  Color = names(proportion_2008),
+  Proportion_2008 = as.numeric(proportion_2008),
+  Proportion_2009 = as.numeric(proportion_2009)
+)
+
+# Melt the data frame for plotting
+color_proportions_melted <- melt(color_proportions, id.vars = "Color")
+
+# Plot 2008-2009
+ggplot(color_proportions_melted, aes(x = variable, y = value, color = Color, group = Color)) +
+  geom_point(aes(color = Color)) + geom_line() +
+  labs(x = "Year", y = "Proportion", title = "Change in Color (2008-2009)") +
+  scale_x_discrete(labels = c("2008", "2009")) + scale_color_manual(values = colors) + 
+  theme_minimal()
+```
+
+```{r length plot 3}
+length_2008 <- unique(Vogue_Images$short_or_long[Vogue_Images$year == 2008])
+length_2009 <- unique(Vogue_Images$short_or_long[Vogue_Images$year == 2009])
+
+# Combine unique colors and remove duplicates
+all_lengths <- union(length_2008, length_2009)
+
+# Calculate proportions for each year
+proportion_2008 <- prop.table(table(factor(Vogue_Images$short_or_long[Vogue_Images$year == 2008], levels = all_lengths)))
+proportion_2009 <- prop.table(table(factor(Vogue_Images$short_or_long[Vogue_Images$year == 2009], levels = all_lengths)))
+
+# Create a data frame with color proportions
+length_proportions <- data.frame(
+  Length = names(proportion_2008),
+  Proportion_2008 = as.numeric(proportion_2008),
+  Proportion_2009 = as.numeric(proportion_2009)
+)
+
+# Melt the data frame for plotting
+length_proportions_melted <- melt(length_proportions, id.vars = "Length")
+
+# Plot 2008-2009
+ggplot(length_proportions_melted, aes(x = variable, y = value, color = Length, group = Length)) +
+  geom_point() + geom_line() +
+  labs(x = "Year", y = "Proportion", color = "Length", title = "Change in Length (2008-2009)") +
+  scale_x_discrete(labels = c("2008", "2009")) +
+  theme_minimal()
+```
+
+```{r fit plot 3}
+fit_2008 <- unique(Vogue_Images$loose_or_tight[Vogue_Images$year == 2008])
+fit_2009 <- unique(Vogue_Images$loose_or_tight[Vogue_Images$year == 2009])
+
+all_fits <- union(fit_2008, fit_2009)
+
+# Calculate proportions for each year
+proportion_2008 <- prop.table(table(factor(Vogue_Images$loose_or_tight[Vogue_Images$year == 2008], levels = all_fits)))
+proportion_2009 <- prop.table(table(factor(Vogue_Images$loose_or_tight[Vogue_Images$year == 2009], levels = all_fits)))
+
+# Create a data frame with color proportions
+fit_proportions <- data.frame(
+  Fit = names(proportion_2008),
+  Proportion_2008 = as.numeric(proportion_2008),
+  Proportion_2009 = as.numeric(proportion_2009)
+)
+
+# Melt the data frame for plotting
+fit_proportions_melted <- melt(fit_proportions, id.vars = "Fit")
+
+# Plot 2008-2009
+ggplot(fit_proportions_melted, aes(x = variable, y = value, color = Fit, group = Fit)) +
+  geom_point() + geom_line() +
+  labs(x = "Year", y = "Proportion", color = "Fit", title = "Change in Fit (2008-2009)") +
+  scale_x_discrete(labels = c("2008", "2009")) +
+  theme_minimal()
+```
+
+```{r color plot 4}
+colors <- c("black", "blue", "brown", "gray", "green", "beige", "pink", "purple", "red", "white", "yellow", "orange")
+
+# Get unique colors for both years
+colors_2019 <- unique(Vogue_Images$primary_color[Vogue_Images$year == 2019])
+colors_2020 <- unique(Vogue_Images$primary_color[Vogue_Images$year == 2020])
+colors_2021 <- unique(Vogue_Images$primary_color[Vogue_Images$year == 2021])
+
+# Combine unique colors and remove duplicates
+all_colors <- unique(c(colors_2019, colors_2020, colors_2021))
+
+# Calculate proportions for each year
+proportion_2019 <- prop.table(table(factor(Vogue_Images$primary_color[Vogue_Images$year == 2019], levels = all_colors)))
+proportion_2020 <- prop.table(table(factor(Vogue_Images$primary_color[Vogue_Images$year == 2020], levels = all_colors)))
+proportion_2021 <- prop.table(table(factor(Vogue_Images$primary_color[Vogue_Images$year == 2021], levels = all_colors)))
+
+# Create a data frame with color proportions
+color_proportions <- data.frame(
+  Color = names(proportion_2019),
+  Proportion_2019 = as.numeric(proportion_2019),
+  Proportion_2020 = as.numeric(proportion_2020),
+  Proportion_2021 = as.numeric(proportion_2021)
+)
+
+# Melt the data frame for plotting
+color_proportions_melted <- melt(color_proportions, id.vars = "Color")
+
+# Plot 2019-2021
+ggplot(color_proportions_melted, aes(x = variable, y = value, color = Color, group = Color)) +
+  geom_point(aes(color = Color)) + geom_line() +
+  labs(x = "Year", y = "Proportion", title = "Change in Color (2019-2021)") +
+  scale_x_discrete(labels = c("2019", "2020", "2021")) + scale_color_manual(values = colors) + 
+  theme_minimal()
+```
+
+```{r length plot 4}
+# Get unique lengths
+length_2019 <- unique(Vogue_Images$short_or_long[Vogue_Images$year == 2019])
+length_2020 <- unique(Vogue_Images$short_or_long[Vogue_Images$year == 2020])
+length_2021 <- unique(Vogue_Images$short_or_long[Vogue_Images$year == 2021])
+
+# Combine unique colors and remove duplicates
+all_lengths <- unique(c(length_2019, length_2020, length_2021))
+
+# Calculate proportions for each year
+proportion_2019 <- prop.table(table(factor(Vogue_Images$short_or_long[Vogue_Images$year == 2019], levels = all_lengths)))
+proportion_2020 <- prop.table(table(factor(Vogue_Images$short_or_long[Vogue_Images$year == 2020], levels = all_lengths)))
+proportion_2021 <- prop.table(table(factor(Vogue_Images$short_or_long[Vogue_Images$year == 2021], levels = all_lengths)))
+
+# Create a data frame with color proportions
+length_proportions <- data.frame(
+  Length = names(proportion_2019),
+  Proportion_2019 = as.numeric(proportion_2019),
+  Proportion_2020 = as.numeric(proportion_2020),
+  Proportion_2021 = as.numeric(proportion_2021)
+)
+
+# Melt the data frame for plotting
+length_proportions_melted <- melt(length_proportions, id.vars = "Length")
+
+# Plot 2019-2021
+ggplot(length_proportions_melted, aes(x = variable, y = value, color = Length, group = Length)) +
+  geom_point() + geom_line() +
+  labs(x = "Year", y = "Proportion", color = "Length", title = "Change in Length (2019-2021)") +
+  scale_x_discrete(labels = c("2019", "2020", "2021")) +
+  theme_minimal()
+```
+
+```{r fit plot 4}
+# Get unique fits for both years
+fit_2019 <- unique(Vogue_Images$loose_or_tight[Vogue_Images$year == 2019])
+fit_2020 <- unique(Vogue_Images$loose_or_tight[Vogue_Images$year == 2020])
+fit_2021 <- unique(Vogue_Images$loose_or_tightr[Vogue_Images$year == 2021])
+
+# Combine unique fits and remove duplicates
+all_fits <- unique(c(fit_2019, fit_2020, fit_2021))
+
+# Calculate proportions for each year
+proportion_2019 <- prop.table(table(factor(Vogue_Images$loose_or_tight[Vogue_Images$year == 2019], levels = all_fits)))
+proportion_2020 <- prop.table(table(factor(Vogue_Images$loose_or_tight[Vogue_Images$year == 2020], levels = all_fits)))
+proportion_2021 <- prop.table(table(factor(Vogue_Images$loose_or_tight[Vogue_Images$year == 2021], levels = all_fits)))
+
+# Create a data frame with color proportions
+fit_proportions <- data.frame(
+  Fit = names(proportion_2019),
+  Proportion_2019 = as.numeric(proportion_2019),
+  Proportion_2020 = as.numeric(proportion_2020),
+  Proportion_2021 = as.numeric(proportion_2021)
+)
+
+# Melt the data frame for plotting
+fit_proportions_melted <- melt(fit_proportions, id.vars = "Fit")
+
+# Plot 2019-2021
+ggplot(fit_proportions_melted, aes(x = variable, y = value, color = Fit, group = Fit)) +
+  geom_point(aes(color = Fit)) + geom_line() +
+  labs(x = "Year", y = "Proportion", title = "Change in Fit (2019-2021)") +
+  scale_x_discrete(labels = c("2019", "2020", "2021")) + 
+  theme_minimal()
+```
+
+```{r multi lgr color}  
+library(nnet)
+# Separate specific years and seasons from dataset
+Vogue_Images$year_1999 <- as.numeric(Vogue_Images$year == 1999)
+Vogue_Images$year_2000 <- as.numeric(Vogue_Images$year == 2000)
+Vogue_Images$year_2001 <- as.numeric(Vogue_Images$year == 2001)
+Vogue_Images$year_2002 <- as.numeric(Vogue_Images$year == 2002)
+Vogue_Images$year_2008 <- as.numeric(Vogue_Images$year == 2008)
+Vogue_Images$year_2009 <- as.numeric(Vogue_Images$year == 2009)
+Vogue_Images$year_2019 <- as.numeric(Vogue_Images$year == 2019)
+Vogue_Images$year_2020 <- as.numeric(Vogue_Images$year == 2020)
+Vogue_Images$year_2021 <- as.numeric(Vogue_Images$year == 2021)
+
+# Create models for color
+mod1 <- multinom(primary_color ~ year_1999 + year_2000, data = Vogue_Images)
+#summary(mod1)
+
+mod2 <- multinom(primary_color ~ year_2001 + year_2002, data = Vogue_Images)
+#summary(mod2)
+
+mod3 <- multinom(primary_color ~ year_2008 + year_2009, data = Vogue_Images)
+#summary(mod3)
+
+mod4 <- multinom(primary_color ~ year_2019 + year_2020 + year_2021, data = Vogue_Images)
+#summary(mod4)
+```
+
+```{r multi lr length}
+# Create models for length
+mod5 <- multinom(short_or_long ~ year_1999 + year_2000, data = Vogue_Images)
+#summary(mod5)
+
+mod6 <- multinom(short_or_long ~ year_2001 + year_2002, data = Vogue_Images)
+#summary(mod6)
+
+mod7 <- multinom(short_or_long ~ year_2008 + year_2009, data = Vogue_Images)
+#summary(mod7)
+
+mod8 <- multinom(short_or_long ~ year_2019 + year_2020 + year_2021, data = Vogue_Images)
+#summary(mod8)
+```
+
+```{r mlr fit}
+# Create models for fit
+mod9 <- multinom(loose_or_tight ~ year_1999 + year_2000, data = Vogue_Images)
+#summary(mod9)
+
+mod10 <- multinom(loose_or_tight ~ year_2001 + year_2002, data = Vogue_Images)
+#summary(mod10)
+
+mod11 <- multinom(loose_or_tight ~ year_2008 + year_2009, data = Vogue_Images)
+#summary(mod11)
+
+mod12 <- multinom(loose_or_tight ~ year_2019 + year_2020 + year_2021, data = Vogue_Images)
+#summary(mod12)
+```
 
 ```{r clustering}
 library(cluster)
 library(factoextra)
 library(caret)
+# Create K-means clustering model
 x <- Vogue_Images[, 4:7]
 dummy_data <- dummyVars(~., data = x)
 categorical_matrix <- predict(dummy_data, newdata = x)
-# scaled_x <- scale(x)
-# wss <- numeric(10)
 wcss_values <- c()
 for (k in 1:10) {
   kmodes_result <- pam(categorical_matrix, k)
@@ -81,11 +468,65 @@ for (k in 1:10) {
 ```
 
 ```{r k means clustering}
+# Perform clustering and plot clusters
 set.seed(123)
-k <- 3
+k <- 5
 kmeans_result <- kmeans(categorical_matrix, centers = k)
 cluster_assignments <- kmeans_result$cluster
 fviz_cluster(list(data = categorical_matrix, cluster = cluster_assignments))
+```
+```{r cluster post-hoc}
+# Assign cluster assignments to Vogue_Images
+Vogue_Images$cluster <- cluster_assignments
+
+# Subset by cluster assignments
+cluster_1 <- Vogue_Images[Vogue_Images$cluster == 1, ]
+variables_frequency1 <- lapply(cluster_1[, 1:7], table)
+cluster_2 <- Vogue_Images[Vogue_Images$cluster == 2, ]
+variables_frequency2 <- lapply(cluster_2[, 1:7], table)
+cluster_3 <- Vogue_Images[Vogue_Images$cluster == 3, ]
+variables_frequency3 <- lapply(cluster_3[, 1:7], table)
+cluster_4 <- Vogue_Images[Vogue_Images$cluster == 4, ]
+variables_frequency4 <- lapply(cluster_4[, 1:7], table)
+cluster_5 <- Vogue_Images[Vogue_Images$cluster == 5, ]
+variables_frequency5 <- lapply(cluster_5[, 1:7], table)
+```
+
+```{r chi squared}
+library(gplots)
+library(graphics)
+library(vcd)
+library(corrplot)
+# Chi-squared for color
+color_table <- table(Vogue_Images$primary_color)
+chisq1 <- chisq.test(color_table)
+print(chisq1)
+# Plot residuals
+residuals <- as.data.frame(chisq1$residuals)
+residuals <- as.data.frame(sapply(residuals, as.numeric))
+barplot(t(residuals), beside = TRUE, legend.text = TRUE,
+        main = "Residuals from Chi-Squared Test", 
+        xlab = "Category", ylab = "Residuals")
+# Chi-squared for length
+length_table <- table(Vogue_Images$short_or_long)
+chisq2 <- chisq.test(length_table)
+print(chisq2)
+# Plot residuals
+residuals <- as.data.frame(chisq2$residuals)
+residuals <- as.data.frame(sapply(residuals, as.numeric))
+barplot(t(residuals), beside = TRUE, legend.text = TRUE,
+        main = "Residuals from Chi-Squared Test", 
+        xlab = "Category", ylab = "Residuals")
+# Chi-squared for fit
+fit_table <- table(Vogue_Images$loose_or_tight)
+chisq3 <- chisq.test(fit_table)
+print(chisq3)
+# Plot residuals
+residuals <- as.data.frame(chisq3$residuals)
+residuals <- as.data.frame(sapply(residuals, as.numeric))
+barplot(t(residuals), beside = TRUE, legend.text = TRUE,
+        main = "Residuals from Chi-Squared Test", 
+        xlab = "Category", ylab = "Residuals")
 ```
 
 ``` {r knn classification}
@@ -101,7 +542,7 @@ test_rx <- Vogue_Images[-random_sample, ] %>% select(year)
 test_ry <- Vogue_Images[-random_sample, ] %>% select(primary_color)
 
 # Specify number of neighbors
-k <- 4
+k <- 5
 
 # Perform KNN classification
 knn_result <- knn(train = as.matrix(train_rx), test = as.matrix(test_rx), cl = unlist(train_ry), k = k)
@@ -109,48 +550,55 @@ knn_result <- knn(train = as.matrix(train_rx), test = as.matrix(test_rx), cl = u
 # Evaluate the classification accuracy
 accuracy <- sum(knn_result == unlist(test_ry)) / length(unlist(test_ry))
 cat("Accuracy:", accuracy, "\n")
+
+# Create confusion matrix
+conf_matrix <- table(Predicted = knn_result, Actual = unlist(test_ry))
+print(conf_matrix)
 ```
 
 ```{r knn classification 2}
 # Split data into train and test sets
-random_sample <- createDataPartition(Vogue_Images$year,
+random_sample <- createDataPartition(Vogue_Images$short_or_long,
                                 p = 0.8, list = FALSE)
-train_cx <- Vogue_Images[random_sample, ] %>% select(year)
-train_cy <- Vogue_Images[random_sample, ] %>% select(short_or_long)
-test_cx <- Vogue_Images[-random_sample, ] %>% select(year)
-test_cy <- Vogue_Images[-random_sample, ] %>% select(short_or_long)
+train_rx <- Vogue_Images[random_sample, ] %>% select(year)
+train_ry <- Vogue_Images[random_sample, ] %>% select(short_or_long)
+test_rx <- Vogue_Images[-random_sample, ] %>% select(year)
+test_ry <- Vogue_Images[-random_sample, ] %>% select(short_or_long)
 
 # Specify number of neighbors
-k <- 4
+k <- 5
 
 # Perform KNN classification
-knn_result <- knn(train = as.matrix(train_cx), test = as.matrix(test_cx), cl = unlist(train_cy), k = k)
+knn_result <- knn(train = as.matrix(train_rx), test = as.matrix(test_rx), cl = unlist(train_ry), k = k)
 
 # Evaluate the classification accuracy
-accuracy <- sum(knn_result == unlist(test_cy)) / length(unlist(test_cy))
+accuracy <- sum(knn_result == unlist(test_ry)) / length(unlist(test_ry))
 cat("Accuracy:", accuracy, "\n")
 
-conf_matrix <- table(Predicted = knn_result, Actual = unlist(test_cy))
+# Create confusion matrix
+conf_matrix <- table(Predicted = knn_result, Actual = unlist(test_ry))
+print(conf_matrix)
 ```
 
 ```{r knn 3}
-random_sample <- createDataPartition(Vogue_Images$year,
+random_sample <- createDataPartition(Vogue_Images$loose_or_tight,
                                 p = 0.8, list = FALSE)
-train_cx <- Vogue_Images[random_sample, ] %>% select(year)
-train_cy <- Vogue_Images[random_sample, ] %>% select(loose_or_tight)
-test_cx <- Vogue_Images[-random_sample, ] %>% select(year)
-test_cy <- Vogue_Images[-random_sample, ] %>% select(loose_or_tight)
+train_rx <- Vogue_Images[random_sample, ] %>% select(year)
+train_ry <- Vogue_Images[random_sample, ] %>% select(loose_or_tight)
+test_rx <- Vogue_Images[-random_sample, ] %>% select(year)
+test_ry <- Vogue_Images[-random_sample, ] %>% select(loose_or_tight)
 
 # Specify number of neighbors
-k <- 4
+k <- 5
 
 # Perform KNN classification
-knn_result <- knn(train = as.matrix(train_cx), test = as.matrix(test_cx), cl = unlist(train_cy), k = k)
+knn_result <- knn(train = as.matrix(train_rx), test = as.matrix(test_rx), cl = unlist(train_ry), k = k)
 
 # Evaluate the classification accuracy
-accuracy <- sum(knn_result == unlist(test_cy)) / length(unlist(test_cy))
+accuracy <- sum(knn_result == unlist(test_ry)) / length(unlist(test_ry))
 cat("Accuracy:", accuracy, "\n")
+
+# Create confusion matrix
+conf_matrix <- table(Predicted = knn_result, Actual = unlist(test_ry))
+print(conf_matrix)
 ```
-
-
-
