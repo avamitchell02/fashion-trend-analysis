@@ -11,6 +11,14 @@ avamitch313@gmail.com
 
 This research paper aims to quantify the historically qualitative subject of women’s fashion trends in the United States. It delves into the intricate relationship between American history, culture, and fashion, and explores how fashion not only influences its surroundings, but also how it can be impacted by its environment. While acknowledging the impact of factors such as the economy and socio-political climate on fashion trends, there is a noticeable gap in empirical data linking such influences to fashion evolution. Thus, this study aims to address this knowledge gap by analyzing a dataset of tagged images scraped from Vogue Runway’s website. Anticipated findings include correlations between darker colors and looser silhouettes with times of economic uncertainty, typically stemming from major national events. Through this analysis, the paper aims to provide deeper quantitative insights into the interplay between women’s fashion trends and significant American milestones.
 
+### Data
+
+Description: The dataset is comprised of "tags" based on images from Vogue Runway's website. The images were collected using a web scraping app from GitHub called "Vogue Runway Scraper".
+Sources: Data compiled from public domain sources. 
+Citations/URLs:
+R-K-H. (2018). R-K-H/vogue-runway-scraper: This application was built to help scrape the fashion looks from different shows. GitHub. https://github.com/R-K-H/vogue-runway-scraper
+
+
 
 ### Findings
 
