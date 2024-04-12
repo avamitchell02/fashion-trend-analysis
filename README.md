@@ -3,9 +3,7 @@ Senior capstone research project for DA 401 on the connection between women's fa
 
 
 ### Author
-Ava R. Mitchell
-
-avamitch313@gmail.com
+Ava R. Mitchell: avamitch313@gmail.com
 
 ### Purpose
 
@@ -14,11 +12,12 @@ This research paper aims to quantify the historically qualitative subject of wom
 ### Data
 
 Description: The dataset is comprised of "tags" based on images from Vogue Runway's website. The images were collected using a web scraping app from GitHub called "Vogue Runway Scraper".
+
 Sources: Data compiled from public domain sources. 
+
 Citations/URLs:
+
 R-K-H. (2018). R-K-H/vogue-runway-scraper: This application was built to help scrape the fashion looks from different shows. GitHub. https://github.com/R-K-H/vogue-runway-scraper
-
-
 
 ### Findings
 
