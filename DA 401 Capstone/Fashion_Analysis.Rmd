@@ -17,22 +17,23 @@ summary(Vogue_Images)
 ```
 
 ``` {r barplot color}
-# Count colors as proportion of total
-item_proportions <- Vogue_Images %>%
-  group_by(year, season, designer, item_described) %>%
+# Filter dataset to avoid little lines on graph
+filtered_data <- Vogue_Images[7:7]
+# Count items as proportion of total
+item_proportions <- filtered_data %>%
+  group_by(item_described) %>%
   summarise(count = n()) %>%
-  group_by(year, designer) %>%
   mutate(proportion = count / sum(count))
 
 # Create the bar plot
 ggplot(item_proportions, aes(x= item_described, y = proportion)) + geom_bar(stat = "identity", position = "stack") +
-  labs(x = "Clothing item", y = "Frequency", title = "Frequency of analyzed clothing items") + theme_minimal()
+  labs(x = "Clothing item", y = "Frequency (%)", title = "Frequency of analyzed clothing items") + theme_classic()
 ```
 
 ```{r color plots}
 library(reshape2)
 # Create color palette
-colors <- c("black", "blue", "brown", "gray", "green", "beige", "orange", "pink", "purple", "red", "white", "yellow")
+colors <- c("black", "blue", "brown", "gray", "green", "lightblue", "orange", "pink", "purple", "red", "beige", "yellow")
 
 # Get unique colors for both years
 colors_1999 <- unique(Vogue_Images$primary_color[Vogue_Images$year == 1999])
@@ -60,7 +61,7 @@ ggplot(color_proportions_melted, aes(x = variable, y = value, color = Color, gro
   geom_point(aes(color = Color)) + geom_line() +
   labs(x = "Year", y = "Proportion", title = "Change in Color (1999-2000)") +
   scale_x_discrete(labels = c("1999", "2000")) + scale_color_manual(values = colors) + 
-  theme_minimal()
+  theme_classic()
 ```
 ```{r length plots}
 length_1999 <- unique(Vogue_Images$short_or_long[Vogue_Images$year == 1999])
@@ -87,7 +88,7 @@ ggplot(length_proportions_melted, aes(x = variable, y = value, color = Length, g
   geom_point() + geom_line() +
   labs(x = "Year", y = "Proportion", color = "Length", title = "Change in Length (1999-2000)") +
   scale_x_discrete(labels = c("1999", "2000")) +
-  theme_minimal()
+  theme_classic()
 ```
 ```{r fit plots}
 fit_1999 <- unique(Vogue_Images$loose_or_tight[Vogue_Images$year == 1999])
@@ -115,10 +116,10 @@ ggplot(fit_proportions_melted, aes(x = variable, y = value, color = Fit, group =
   geom_point() + geom_line() +
   labs(x = "Year", y = "Proportion", color = "Fit", title = "Change in Fit (1999-2000)") +
   scale_x_discrete(labels = c("1999", "2000")) +
-  theme_minimal()
+  theme_classic()
 ```
 ```{r color plot 2}
-colors <- c("black", "blue", "brown", "gray", "green", "beige", "pink", "purple", "red", "white", "yellow", "orange")
+colors <- c("black", "blue", "brown", "gray", "green", "lightblue", "pink", "purple", "red", "beige", "yellow", "orange")
 
 # Get unique colors for both years
 colors_2001 <- unique(Vogue_Images$primary_color[Vogue_Images$year == 2001])
@@ -146,7 +147,7 @@ ggplot(color_proportions_melted, aes(x = variable, y = value, color = Color, gro
   geom_point(aes(color = Color)) + geom_line() +
   labs(x = "Year", y = "Proportion", title = "Change in Color (2001-2002)") +
   scale_x_discrete(labels = c("2001", "2002")) + scale_color_manual(values = colors) + 
-  theme_minimal()
+  theme_classic()
 ```
 ```{r length plot 2}
 length_2001 <- unique(Vogue_Images$short_or_long[Vogue_Images$year == 2001])
@@ -174,7 +175,7 @@ ggplot(length_proportions_melted, aes(x = variable, y = value, color = Length, g
   geom_point() + geom_line() +
   labs(x = "Year", y = "Proportion", color = "Length", title = "Change in Length (2001-2002)") +
   scale_x_discrete(labels = c("2001", "2002")) +
-  theme_minimal()
+  theme_classic()
 ```
 
 ```{r fit plot 2}
@@ -202,11 +203,11 @@ ggplot(fit_proportions_melted, aes(x = variable, y = value, color = Fit, group =
   geom_point() + geom_line() +
   labs(x = "Year", y = "Proportion", color = "Fit", title = "Change in Fit (2001-2002)") +
   scale_x_discrete(labels = c("2001", "2002")) +
-  theme_minimal()
+  theme_classic()
 ```
 
 ```{r color plot 3}
-colors <- c("black", "blue", "brown", "gray", "green", "beige", "orange", "pink", "red", "white", "yellow", "purple")
+colors <- c("black", "blue", "brown", "gray", "green", "lightblue", "orange", "pink", "red", "beige", "yellow", "purple")
 
 # Get unique colors for both years
 colors_2008 <- unique(Vogue_Images$primary_color[Vogue_Images$year == 2008])
@@ -234,7 +235,7 @@ ggplot(color_proportions_melted, aes(x = variable, y = value, color = Color, gro
   geom_point(aes(color = Color)) + geom_line() +
   labs(x = "Year", y = "Proportion", title = "Change in Color (2008-2009)") +
   scale_x_discrete(labels = c("2008", "2009")) + scale_color_manual(values = colors) + 
-  theme_minimal()
+  theme_classic()
 ```
 
 ```{r length plot 3}
@@ -263,7 +264,7 @@ ggplot(length_proportions_melted, aes(x = variable, y = value, color = Length, g
   geom_point() + geom_line() +
   labs(x = "Year", y = "Proportion", color = "Length", title = "Change in Length (2008-2009)") +
   scale_x_discrete(labels = c("2008", "2009")) +
-  theme_minimal()
+  theme_classic()
 ```
 
 ```{r fit plot 3}
@@ -291,11 +292,11 @@ ggplot(fit_proportions_melted, aes(x = variable, y = value, color = Fit, group =
   geom_point() + geom_line() +
   labs(x = "Year", y = "Proportion", color = "Fit", title = "Change in Fit (2008-2009)") +
   scale_x_discrete(labels = c("2008", "2009")) +
-  theme_minimal()
+  theme_classic()
 ```
 
 ```{r color plot 4}
-colors <- c("black", "blue", "brown", "gray", "green", "beige", "pink", "purple", "red", "white", "yellow", "orange")
+colors <- c("black", "blue", "brown", "gray", "green", "lightblue", "pink", "purple", "red", "beige", "yellow", "orange")
 
 # Get unique colors for both years
 colors_2019 <- unique(Vogue_Images$primary_color[Vogue_Images$year == 2019])
@@ -326,7 +327,7 @@ ggplot(color_proportions_melted, aes(x = variable, y = value, color = Color, gro
   geom_point(aes(color = Color)) + geom_line() +
   labs(x = "Year", y = "Proportion", title = "Change in Color (2019-2021)") +
   scale_x_discrete(labels = c("2019", "2020", "2021")) + scale_color_manual(values = colors) + 
-  theme_minimal()
+  theme_classic()
 ```
 
 ```{r length plot 4}
@@ -359,7 +360,7 @@ ggplot(length_proportions_melted, aes(x = variable, y = value, color = Length, g
   geom_point() + geom_line() +
   labs(x = "Year", y = "Proportion", color = "Length", title = "Change in Length (2019-2021)") +
   scale_x_discrete(labels = c("2019", "2020", "2021")) +
-  theme_minimal()
+  theme_classic()
 ```
 
 ```{r fit plot 4}
@@ -392,7 +393,7 @@ ggplot(fit_proportions_melted, aes(x = variable, y = value, color = Fit, group =
   geom_point(aes(color = Fit)) + geom_line() +
   labs(x = "Year", y = "Proportion", title = "Change in Fit (2019-2021)") +
   scale_x_discrete(labels = c("2019", "2020", "2021")) + 
-  theme_minimal()
+  theme_classic()
 ```
 
 ```{r multi lgr color}  
@@ -501,32 +502,44 @@ library(corrplot)
 color_table <- table(Vogue_Images$primary_color)
 chisq1 <- chisq.test(color_table)
 print(chisq1)
-# Plot residuals
-residuals <- as.data.frame(chisq1$residuals)
-residuals <- as.data.frame(sapply(residuals, as.numeric))
-barplot(t(residuals), beside = TRUE, legend.text = TRUE,
-        main = "Residuals from Chi-Squared Test", 
-        xlab = "Category", ylab = "Residuals")
+# Get residuals
+adjusted_res <- residuals(chisq1, type = "pearson")
+adjusted_res
 # Chi-squared for length
 length_table <- table(Vogue_Images$short_or_long)
 chisq2 <- chisq.test(length_table)
 print(chisq2)
-# Plot residuals
-residuals <- as.data.frame(chisq2$residuals)
-residuals <- as.data.frame(sapply(residuals, as.numeric))
-barplot(t(residuals), beside = TRUE, legend.text = TRUE,
-        main = "Residuals from Chi-Squared Test", 
-        xlab = "Category", ylab = "Residuals")
+# Get residuals
+adjusted_res <- residuals(chisq2, type = "pearson")
+adjusted_res
 # Chi-squared for fit
 fit_table <- table(Vogue_Images$loose_or_tight)
 chisq3 <- chisq.test(fit_table)
 print(chisq3)
-# Plot residuals
-residuals <- as.data.frame(chisq3$residuals)
-residuals <- as.data.frame(sapply(residuals, as.numeric))
-barplot(t(residuals), beside = TRUE, legend.text = TRUE,
-        main = "Residuals from Chi-Squared Test", 
-        xlab = "Category", ylab = "Residuals")
+# Get residuals
+adjusted_res <- residuals(chisq3, type = "pearson")
+adjusted_res
+# Chi-squared for year
+year_table <- table(Vogue_Images$year)
+chisq4 <- chisq.test(year_table)
+print(chisq4)
+# Get residuals
+adjusted_res <- residuals(chisq4, type = "pearson")
+adjusted_res
+# Chi-squared for season
+season_table <- table(Vogue_Images$season)
+chisq5 <- chisq.test(season_table)
+print(chisq5)
+# Get residuals
+adjusted_res <- residuals(chisq5, type = "pearson")
+adjusted_res
+# Chi-squared for designer
+designer_table <- table(Vogue_Images$designer)
+chisq6 <- chisq.test(designer_table)
+print(chisq6)
+# Get residuals
+adjusted_res <- residuals(chisq6, type = "pearson")
+adjusted_res
 ```
 
 ``` {r knn classification}
